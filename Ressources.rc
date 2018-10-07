@@ -1,1 +1,15 @@
-Single IMAGE Images/Single.png
+
+
+SettingBoxImage IMAGE Images/SettingsBox.png
+DiagramBoxImage IMAGE Images/DiagramBox.png
+Status IMAGE Images/StatusBox.png
+Listbox IMAGE Images/Listbox.png
+
+PieChart IMAGE Images/Circle.png
+ColumnChart IMAGE Images/Column.png
+BarChart IMAGE Images/Bar.png
+
+PieChartPressed IMAGE Images/CirclePressed.png
+ColumnChartPressed IMAGE Images/ColumnPressed.png
+BarChartPressed IMAGE Images/BarPressed.png
+

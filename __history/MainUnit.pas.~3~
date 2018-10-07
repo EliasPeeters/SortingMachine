@@ -1,0 +1,87 @@
+unit MainUnit;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, OpenImage, Vcl.StdCtrls;
+
+type
+  TBox = Record
+    Dark: Boolean;
+    Position: Integer;
+  End;
+
+
+
+  TMainForm = class(TForm)
+    Timer1: TTimer;
+    procedure Timer1Timer(Sender: TObject);
+    procedure CreateButton(var ButtonName: TButton; Form: TForm; HeightInteger, WidthInteger, LeftInteger, TopInteger: Integer; CaptionString: String);
+    procedure buttonClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+  private
+    { Private-Deklarationen }
+  public
+    { Public-Deklarationen }
+  end;
+
+var
+  MainForm: TMainForm;
+  Test: TButton;
+  BackgroundColor: TColor;
+  Boxen: Array[0..8] of TBox;
+
+implementation
+
+{$R *.dfm}
+
+procedure TMainForm.CreateButton(var ButtonName: TButton; Form: TForm; HeightInteger, WidthInteger, LeftInteger, TopInteger: Integer; CaptionString: String);
+begin
+  ButtonName:= TButton.Create(Form);
+
+  with ButtonName do
+  begin
+    Caption:= CaptionString;
+    Parent := Form;
+    Height := HeightInteger;
+    Width := WidthInteger;
+    Left:= LeftInteger;
+    Top:= TopInteger;
+    OnClick:= ButtonClick;
+  end;
+
+end;
+
+procedure TMainForm.FormCreate(Sender: TObject);
+begin
+  BackgroundColor:= rgb(237,242, 245);
+  color:= BackgroundColor;
+end;
+
+procedure TMainForm.buttonClick(Sender: TObject);
+var
+  Button: TButton;
+begin
+  Button:= Sender as TButton;
+end;
+
+ procedure DrawSideBar(Canvas: TPaintbox);
+begin
+  with Canvas.Canvas do
+  begin
+    Pen.Color:= rgb(48, 61, 78);
+    Brush.Color:= rgb(48, 61, 78);
+
+    Rectangle(0,0, 70, Canvas.Height);
+  end;
+
+end;
+
+procedure TMainForm.Timer1Timer(Sender: TObject);
+begin
+
+  Timer1.Enabled:= false;
+end;
+
+end.
