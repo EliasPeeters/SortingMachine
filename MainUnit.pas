@@ -4,15 +4,24 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, OpenImage, Vcl.StdCtrls;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, OpenImage, Vcl.StdCtrls,
+  Vcl.AppEvnts, DrawDiagram;
 
 type
+
+  TClickAbleArea = Record
+    x1: Integer;
+    x2: Integer;
+    y1: Integer;
+    y2: Integer;
+  End;
 
 
   TMainForm = class(TForm)
     Timer1: TTimer;
     Timer2: TTimer;
     Label1: TLabel;
+    ApplicationEvents1: TApplicationEvents;
     procedure Timer1Timer(Sender: TObject);
 
     procedure CreateButton(var ButtonName: TButton; Form: TForm; HeightInteger, WidthInteger, LeftInteger, TopInteger: Integer; CaptionString: String);
@@ -28,12 +37,15 @@ type
     procedure CreateUI();
 
     procedure DrawSideBar(Canvas: TPaintbox);
-    procedure DrawTopBar;
-    procedure DrawSelector;
+    procedure DrawTopBar();
+    procedure DrawSelector(Selected: String; Opened: Boolean);
     procedure DrawBox(Ptn: TPaintbox);
 
-    procedure DefineColors;
     procedure Timer2Timer(Sender: TObject);
+    procedure ApplicationEvents1Message(var Msg: tagMSG; var Handled: Boolean);
+
+    procedure DefineRects();
+    procedure DefineColors();
 
   private
     { Private-Deklarationen }
@@ -52,7 +64,9 @@ var
   DropDownOpended: Boolean = false;
   Working: Boolean = false;
   SelectedChartType: Integer = 1;
+  SelectedSorting: Integer = 0;
   CursorPosition: TPoint;
+  BubbleSortButton: TClickAbleArea;
 
   {
     1 = PieChart
@@ -60,10 +74,24 @@ var
     3 = ColumnChart
   }
 
+  {
+    1 = QuickSort
+    2 = BubbleSort
+    3 = BoggoSort
+  }
+
 
 implementation
 
 {$R *.dfm}
+
+procedure TMainForm.DefineRects;
+begin
+  BubbleSortButton.x1:= 948;
+  BubbleSortButton.x2:= 1248;
+  BubbleSortButton.y1:= 370;
+  BubbleSortButton.y2:= 410;
+end;
 
 procedure TMainForm.DefineColors;
 begin
@@ -133,10 +161,27 @@ end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-  DefineColors;
+  DefineColors();
+  DefineRects();
   BackgroundColor:= GreyCustom;
   color:= BackgroundColor;
 
+end;
+
+procedure TMainForm.ApplicationEvents1Message(var Msg: tagMSG;
+  var Handled: Boolean);
+begin
+  if Msg.message=WM_LBUTTONDOWN then
+  begin
+
+
+    if DropDownOpended and ((CursorPosition.X >= 948 ) and (CursorPosition.X <= 1248 )) and ((CursorPosition.Y >= 370) and (CursorPosition.Y <= 410))   then
+    begin
+      Label1.Font.Color:= clGreen;
+      DrawSelector('BubbleSort', true);
+      SelectedSorting:= 2;
+    end;
+  end;
 end;
 
 procedure TMainForm.buttonClick(Sender: TObject);
@@ -453,7 +498,7 @@ begin
     //CursorPosition:= Mouse.CursorPos;
 
 
-
+    {
     if ((CursorPosition.X >= 948 ) and (CursorPosition.X <= 1248 )) and ((CursorPosition.Y >= 400) and (CursorPosition.Y <= 440)) then
     begin
       with PtnSortingSelection.Canvas do
@@ -467,7 +512,7 @@ begin
         end;
         TextOut(PtnSortingSelection.Height div 2, 17, 'Test');
       end;
-    end;
+    end;}
   end;
 
 end;
@@ -496,7 +541,7 @@ begin
 
 end;
 
-procedure TMainForm.DrawSelector;
+procedure TMainForm.DrawSelector(Selected: String; Opened: Boolean);
 begin
   with PtnSortingSelection.Canvas do
   begin
@@ -508,13 +553,23 @@ begin
     begin
       Name:= 'Arial';
       Size:= 15;
-      Color:=  GreyCustom;
+      if Selected = 'Select' then Color:=  GreyCustom
+      else Color:= clBlack;
     end;
-    TextOut(PtnSortingSelection.Height div 2, 17, 'Select');
+    TextOut(PtnSortingSelection.Height div 2, 17, Selected);
     pen.Color:= BlueSelected;
-    MoveTo(230, 22);
-    LineTo(240, 29);
-    LineTo(250, 22);
+    if Opened then
+    begin
+      MoveTo(230, 29);
+      LineTo(240, 22);
+      LineTo(250, 29);
+    end
+    else
+    begin
+      MoveTo(230, 22);
+      LineTo(240, 29);
+      LineTo(250, 22);
+    end;
   end;
 
 end;
@@ -567,7 +622,7 @@ begin
   DrawBox(ListBoxImage);
   DrawBox(DiagramBoxImage);
   DrawBox(StatusBoxImage);
-  DrawSelector;
+  DrawSelector('Select', false);
 
 
 end;
@@ -581,11 +636,12 @@ end;
 
 procedure TMainForm.Timer2Timer(Sender: TObject);
 begin
-  CursorPosition:= Mouse.CursorPos;
-  label1.Caption:= IntToStr(mouse.CursorPos.X )+ ',' +IntToStr(Mouse.CursorPos.y);
+  CursorPosition:= ScreenToClient(Mouse.CursorPos);
+  label1.Caption:= IntToStr(CursorPosition.X )+ ',' +IntToStr(CursorPosition.y);
+
   if DropDownOpended then
   begin
-    if ((CursorPosition.X >= 948 ) and (CursorPosition.X <= 1248 )) and ((CursorPosition.Y >= 400) and (CursorPosition.Y <= 440))   then
+    if ((CursorPosition.X >= 948 ) and (CursorPosition.X <= 1248 )) and ((CursorPosition.Y >= 370) and (CursorPosition.Y <= 410))   then
     begin
         PtnSortingSelectionDropDown.Canvas.Brush.Color:= BlueSelected;
         PtnSortingSelectionDropDown.Canvas.Pen.Color:= BlueSelected;

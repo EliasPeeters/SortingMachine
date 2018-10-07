@@ -9,6 +9,13 @@ uses
 
 type
 
+  TClickAbleArea = Record
+    x1: Integer;
+    x2: Integer;
+    y1: Integer;
+    y2: Integer;
+  End;
+
 
   TMainForm = class(TForm)
     Timer1: TTimer;
@@ -30,13 +37,17 @@ type
     procedure CreateUI();
 
     procedure DrawSideBar(Canvas: TPaintbox);
-    procedure DrawTopBar;
+    procedure DrawTopBar();
     procedure DrawSelector(Selected: String; Opened: Boolean);
     procedure DrawBox(Ptn: TPaintbox);
 
-    procedure DefineColors;
     procedure Timer2Timer(Sender: TObject);
     procedure ApplicationEvents1Message(var Msg: tagMSG; var Handled: Boolean);
+
+    procedure DefineRects();
+    procedure DefineColors();
+
+    function CursorIsInArea(Area: TClickAbleArea):Boolean;
 
   private
     { Private-Deklarationen }
@@ -57,6 +68,7 @@ var
   SelectedChartType: Integer = 1;
   SelectedSorting: Integer = 0;
   CursorPosition: TPoint;
+  BubbleSortButton: TClickAbleArea;
 
   {
     1 = PieChart
@@ -74,6 +86,37 @@ var
 implementation
 
 {$R *.dfm}
+
+function TMainForm.CursorIsInArea(Area: TClickAbleArea):Boolean;
+var
+  XAchsTrue, YAchsTrue: Boolean;
+begin
+  XAchsTrue:= False;
+  YAchsTrue:= False;
+
+  if (CursorPosition.x >= Area.x1) and (CursorPosition.x <= Area.x2) then
+  begin
+    XAchsTrue:= True;
+  end;
+
+   if (CursorPosition.y >= Area.y1) and (CursorPosition.y <= Area.y2) then
+  begin
+    YAchsTrue:= True;
+  end;
+
+  if (YAchsTrue) and (XAchsTrue) then
+  begin
+    result:= true;
+  end;
+end;
+
+procedure TMainForm.DefineRects;
+begin
+  BubbleSortButton.x1:= 948;
+  BubbleSortButton.x2:= 1248;
+  BubbleSortButton.y1:= 370;
+  BubbleSortButton.y2:= 410;
+end;
 
 procedure TMainForm.DefineColors;
 begin
@@ -143,7 +186,8 @@ end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-  DefineColors;
+  DefineColors();
+  DefineRects();
   BackgroundColor:= GreyCustom;
   color:= BackgroundColor;
 
@@ -156,7 +200,7 @@ begin
   begin
 
 
-    if DropDownOpended and ((CursorPosition.X >= 948 ) and (CursorPosition.X <= 1248 )) and ((CursorPosition.Y >= 400) and (CursorPosition.Y <= 440))   then
+    if DropDownOpended and ((CursorPosition.X >= 948 ) and (CursorPosition.X <= 1248 )) and ((CursorPosition.Y >= 370) and (CursorPosition.Y <= 410))   then
     begin
       Label1.Font.Color:= clGreen;
       DrawSelector('BubbleSort', true);
@@ -618,11 +662,11 @@ end;
 procedure TMainForm.Timer2Timer(Sender: TObject);
 begin
   CursorPosition:= ScreenToClient(Mouse.CursorPos);
-  label1.Caption:= IntToStr(mouse.CursorPos.X )+ ',' +IntToStr(Mouse.CursorPos.y);
+  label1.Caption:= IntToStr(CursorPosition.X )+ ',' +IntToStr(CursorPosition.y);
 
   if DropDownOpended then
   begin
-    if ((CursorPosition.X >= 948 ) and (CursorPosition.X <= 1248 )) and ((CursorPosition.Y >= 400) and (CursorPosition.Y <= 440))   then
+    if CursorIsInArea(BubbleSortButton) then
     begin
         PtnSortingSelectionDropDown.Canvas.Brush.Color:= BlueSelected;
         PtnSortingSelectionDropDown.Canvas.Pen.Color:= BlueSelected;

@@ -32,4 +32,9 @@ object MainForm: TMainForm
     OnTimer = Timer2Timer
     Left = 40
   end
+  object ApplicationEvents1: TApplicationEvents
+    OnMessage = ApplicationEvents1Message
+    Left = 80
+    Top = 8
+  end
 end

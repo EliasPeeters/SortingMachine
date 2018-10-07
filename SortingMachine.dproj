@@ -107,6 +107,7 @@
             <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="OpenImage.pas"/>
+        <DCCReference Include="DrawDiagram.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

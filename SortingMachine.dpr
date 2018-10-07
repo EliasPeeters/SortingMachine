@@ -5,7 +5,8 @@ program SortingMachine;
 uses
   Vcl.Forms,
   MainUnit in 'MainUnit.pas' {MainForm},
-  OpenImage in 'OpenImage.pas';
+  OpenImage in 'OpenImage.pas',
+  DrawDiagram in 'DrawDiagram.pas';
 
 {$R *.res}
 
