@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, OpenImage, Vcl.StdCtrls,
-  Vcl.AppEvnts, DrawDiagram;
+  Vcl.AppEvnts, DrawDiagram, StrUtils;
 
 type
 
@@ -32,6 +32,12 @@ type
     Timer2: TTimer;
     Label1: TLabel;
     ApplicationEvents1: TApplicationEvents;
+    Button1: TButton;
+
+    //!!
+    procedure Error(ErrorInteger: Integer);
+    //!!
+
     procedure Timer1Timer(Sender: TObject);
 
     procedure CreateButton(var ButtonName: TButton; Form: TForm; HeightInteger, WidthInteger, LeftInteger, TopInteger: Integer; CaptionString: String);
@@ -59,6 +65,15 @@ type
     procedure CreateArea(PositionInt: Integer; TextString: string);
 
     function CursorIsInArea(Area: TClickAbleArea):Boolean;
+    function AnimationSpeed():Double;
+    function CheckIfConfigIsCorrect():Boolean;
+    function ReadCustomln(FileName: String; Line: Integer): String;
+    procedure Button1Click(Sender: TObject);
+
+    procedure AddStringToConfig(AddString: String);
+    procedure TextFileToArray();
+    procedure ArrayToTextFile();
+    procedure LoadSampleConfig();
 
   private
     { Private-Deklarationen }
@@ -67,6 +82,7 @@ type
   end;
 
 var
+  config: String = 'config.txt';
   MainForm: TMainForm;
   Test: TButton;
   BackgroundColor: TColor;
@@ -81,6 +97,9 @@ var
   CursorPosition: TPoint;
   BubbleSortButton, QuickSortButton, BoggoSortButton: TClickAbleArea;
   DropDownItems: Array[0..2] of TClickAbleArea;
+  TextFileStorage: Array[0..100] of String;
+  SampleConfig: Array[0..10] of String;
+
 
   {
     1 = PieChart
@@ -95,14 +114,379 @@ var
   }
 
 
+  (*
+    Template for a config
+
+   1     config of SortingMachine
+   2     by Elias Peeters
+   3
+   4     {
+   5         dark-theme: false;
+   6         animation-speed: 1.5;
+   7
+   8
+   9
+   10
+   11
+   12
+   13
+   14
+   15    }
+
+
+   *)
+
+
+
 implementation
 
 {$R *.dfm}
 
+
+procedure TMainForm.Error(ErrorInteger: Integer);
+begin
+  case ErrorInteger of
+    1:
+      begin
+        with TTaskDialog.Create(self) do
+          begin
+           try
+            Caption := 'Error 1';
+            Title := 'Error 1';
+            Text := 'This is a test error and means nothing. You can keep going with any further thoughts';
+            CommonButtons := [];
+            with TTaskDialogButtonItem(Buttons.Add) do
+            begin
+              Caption := 'Close Dialog';
+              CommandLinkHint := 'You can ignore this type of error';
+              ModalResult := mrClose;
+            end;
+
+             Flags := [tfUseCommandLinks];
+            MainIcon := tdiNone;
+            if execute then
+
+            if ModalResult = mrClose then
+            begin
+              //nothing
+            end;
+
+          finally
+            Free;
+          end;
+        end;
+      end;
+
+    300:
+      begin
+        with TTaskDialog.Create(self) do
+          begin
+           try
+            Caption := 'Error 300';
+            Title := 'FATAL ERROR: Error 300';
+            Text := 'Not able to find config file';
+            CommonButtons := [];
+            with TTaskDialogButtonItem(Buttons.Add) do
+            begin
+              Caption := 'CloseProgram';
+              CommandLinkHint := 'Error 300 is a fatal error';
+              ModalResult := mrClose;
+            end;
+
+            with TTaskDialogButtonItem(Buttons.Add) do
+            begin
+              Caption := 'Try fix';
+              CommandLinkHint := 'Try to add default config file';
+              ModalResult := mrYes;
+            end;
+
+            Flags := [tfUseCommandLinks];
+            MainIcon := tdiError;
+            if execute then
+
+            if ModalResult = mrClose then
+            begin
+              Application.Terminate;
+            end;
+
+            if ModalResult = mrYes then
+            begin
+              //AddStringToConfig('ja moin');
+              LoadSampleConfig();
+            end;
+
+          finally
+            Free;
+          end;
+        end;
+      end;
+
+    306:
+      begin
+        with TTaskDialog.Create(self) do
+          begin
+           try
+            Caption := 'Error 306';
+            Title := 'FATAL ERROR: Error 306';
+            Text := 'Not able to find "animation-speed" in config file';
+            CommonButtons := [];
+            with TTaskDialogButtonItem(Buttons.Add) do
+            begin
+              Caption := 'CloseProgram';
+              CommandLinkHint := 'Error 306 is a fatal error';
+              ModalResult := mrClose;
+            end;
+
+            with TTaskDialogButtonItem(Buttons.Add) do
+            begin
+              Caption := 'Try fix';
+              CommandLinkHint := 'Try to add default animation-speed to config file';
+              ModalResult := mrYes;
+            end;
+
+            Flags := [tfUseCommandLinks];
+            MainIcon := tdiError;
+            if execute then
+
+            if ModalResult = mrClose then
+            begin
+              Application.Terminate;
+            end;
+
+            if ModalResult = mrYes then
+            begin
+              AddStringToConfig('  animation-speed: 1,5');
+              abort;
+            end;
+
+          finally
+            Free;
+          end;
+        end;
+      end;
+
+    404:
+      begin
+        with TTaskDialog.Create(self) do
+          begin
+           try
+            Caption := 'Error 404';
+            Title := 'Error 404';
+            Text := 'The requested resource could not be found but may be available in the future. Subsequent requests by the client are permissible.';
+            CommonButtons := [];
+            with TTaskDialogButtonItem(Buttons.Add) do
+            begin
+              Caption := 'Ignore';
+              CommandLinkHint := 'Igrnore and abort the current action';
+              ModalResult := mrClose;
+            end;
+
+             Flags := [tfUseCommandLinks];
+            //MainIcon := tdiNone;
+            if execute then
+
+            if ModalResult = mrClose then
+            begin
+              //nothing
+            end;
+
+          finally
+            Free;
+          end;
+        end;
+      end;
+
+    //404: ShowMessage('Error 404'+#10#13+ 'Something not found');
+  end;
+end;
+
+
+procedure TMainForm.LoadSampleConfig;
+var
+  I: Integer;
+  ConfigTXT: TextFile;
+begin
+  TextFileStorage[0]:= '7';
+  TextFileStorage[1]:= 'config of SortingMachine';
+  TextFileStorage[2]:= 'by Elias Peeters';
+  TextFileStorage[3]:= '';
+  TextFileStorage[4]:= '{';
+  TextFileStorage[5]:= '  dark-theme: false';
+  TextFileStorage[6]:= '  animation-speed: 1,5';
+  TextFileStorage[7]:= '}';
+
+  AssignFile(ConfigTXT, config);
+  Rewrite(ConfigTXT);
+
+  for I := 1 to StrToInt(TextFileStorage[0]) do
+  begin
+    Writeln(ConfigTXT, TextFileStorage[i]);
+  end;
+  CloseFile(ConfigTXT);
+end;
+
+procedure TMainForm.TextFileToArray();
+var
+  ConfigTXT: TextFile;
+  i, ConfigTXTLength: Integer;
+  StorageString: String;
+begin
+  if FileExists(config) then
+  begin
+
+    AssignFile(ConfigTXT, 'config.txt');
+    Reset(ConfigTXT);
+    ConfigTXTLength:= 0;
+    while not eof(ConfigTXT) do
+    begin
+      Readln(ConfigTXT, StorageString);
+      ConfigTXTLength:= ConfigTXTLength+1;
+    end;
+    CloseFile(ConfigTXT);
+
+    AssignFile(ConfigTXT, config);
+    Reset(ConfigTXT);
+    TextFileStorage[0]:= IntToStr(ConfigTXTLength);
+
+    for I := 1 to ConfigTXTLength-1 do
+    begin
+      Readln(ConfigTXT, StorageString);
+      TextFileStorage[i]:= StorageString;
+
+    end;
+    CloseFile(ConfigTXT);
+
+
+  end
+  else
+  begin
+    Error(300);
+  end;
+end;
+
+procedure TMainForm.ArrayToTextFile();
+var
+  ConfigTXT: TextFile;
+  i, ConfigTXTLength: Integer;
+  StorageString: String;
+begin
+  if FileExists(config) then
+  begin
+
+    AssignFile(ConfigTXT, config);
+    Rewrite(ConfigTXT);
+
+    for I := 1 to StrToInt(TextFileStorage[0]) do
+    begin
+      Writeln(ConfigTXT, TextFileStorage[i]);
+    end;
+    Writeln(ConfigTXT, '}');
+    CloseFile(ConfigTXT);
+
+
+  end
+  else
+  begin
+    Error(300);
+  end;
+end;
+
+
+procedure TMainForm.AddStringToConfig(AddString: string);
+begin
+  TextFileToArray;
+  TextFileStorage[StrToInt(TextFileStorage[0])]:= AddString;
+  ArrayToTextFile;
+
+end;
+
+function TMainForm.ReadCustomln(FileName: String; Line: Integer):String;
+var
+  CustomFile: TextFile;
+  i: Integer;
+  StringToRead: String;
+begin
+  AssignFile(CustomFile, FileName);
+  Reset(CustomFile);
+  for i := 1 to 10000000 do
+  begin
+    Readln(CustomFile, StringToRead);
+    if i = Line then
+    begin
+      result:= StringToRead;
+      break;
+    end;
+  end;
+  CloseFile(CustomFile);
+end;
+
+function MakeStringBetter(InputString: String): String;
+var
+  HelpString: String;
+begin
+  HelpString:= InputString;
+  HelpString:= Copy(InputString,1,2);
+  if Helpstring = '  ' then
+  begin
+    Delete(InputString, 1, 2);
+
+  end;
+  result:= InputString;
+end;
+
 function CalculateDropDownHeight(NumberOfItems: Integer): Integer;
 begin
-  result:= 30+30+NumberOfItems*40;
+  result:= 30+10+NumberOfItems*40;
 end;
+
+
+
+function TMainForm.AnimationSpeed;
+var
+  StorageString: String;
+  AnimationSpeedString: String;
+  FoundInLine, i, ConfigTXTLength: Integer;
+  ConfigTXT: TextFile;
+begin
+
+  TextFileToArray;
+  for I := 1 to StrToInt(TextFileStorage[0])  do
+  begin
+    StorageString:= TextFileStorage[i];
+    StorageString:= MakeStringBetter(StorageString);
+    StorageString:= Copy(StorageString, 1, 15);
+    if StorageString = 'animation-speed' then
+    begin
+      result:= StrToFloat(Copy(TextFileStorage[i], 20, Length(TextFileStorage[i])-19));
+      break;
+    end;
+  end;
+
+  if i-1 = StrToInt(TextFileStorage[0]) then
+  begin
+    error(306);
+    Abort;
+  end;
+
+end;
+
+
+
+
+function TMainForm.CheckIfConfigIsCorrect;
+var
+  Config: TextFile;
+
+begin
+  //if CheckIfConfigIsCorrect then ShowMessage('Worked');
+  AssignFile(Config, 'config.txt');
+  //ReWrite(config);
+
+  //WriteLn(config, '1 2 3 4');
+  Reset(config);
+
+end;
+
 
 function TMainForm.CursorIsInArea(Area: TClickAbleArea):Boolean;
 var
@@ -227,7 +611,14 @@ end;
 
 
 procedure TMainForm.FormCreate(Sender: TObject);
+var
+config: TextFile;
+S: String;
+
+
 begin
+
+
   DefineColors();
   //DefineRects();
   CreateArea(0, 'QuickSort');
@@ -251,6 +642,12 @@ begin
       SelectedSorting:= 2;
     end;
   end;
+end;
+
+procedure TMainForm.Button1Click(Sender: TObject);
+begin
+  //ShowMessage(MakeStringBetter(ReadCustomln('config.txt', 5)));
+  ShowMessage(FloatToStr(AnimationSpeed));
 end;
 
 procedure TMainForm.buttonClick(Sender: TObject);
@@ -335,6 +732,7 @@ var
   Paintbox: TPaintbox;
   I: Integer;
   test2: Boolean;
+  AnimationSpeedDouble: Double;
 begin
   Paintbox:= Sender as TPaintbox;
 
@@ -343,7 +741,7 @@ begin
 
       if (not(DropDownOpended)) and (not(working)) then
       begin
-        PtnSortingSelectionDropDown.Height:= 260;
+        PtnSortingSelectionDropDown.Height:= CalculateDropDownHeight(Length(DropDownItems));
         CreateButton(Test, MainForm, 0, 0, 0, 0, '');
         PtnSortingSelectionDropDown.Canvas.Pen.Color:= clWhite;
         PtnSortingSelectionDropDown.Canvas.Brush.Color:= clWhite;
@@ -360,12 +758,14 @@ begin
         var I: Integer;
         begin
           Working:= true;
-          for I := 14 to 86 do
+          AnimationSpeedDouble:= 0;
+          AnimationSpeedDouble:= AnimationSpeed;
+          for I := 20 to Round((PtnSortingSelectionDropDown.Height) / AnimationSpeedDouble) do
           begin
             PtnSortingSelectionDropDown.Canvas.Brush.Color:= clWhite;
             PtnSortingSelectionDropDown.Canvas.Pen.Color:= GreyCustom;
             PtnSortingSelectionDropDown.Canvas.Pen.Width:= 3;
-            PtnSortingSelectionDropDown.Canvas.RoundRect(10,5,Round(I*1.11)*3, I*3, 30, 30);
+            PtnSortingSelectionDropDown.Canvas.RoundRect(10,5, PtnSortingSelectionDropDown.Width-20, Round(I*AnimationSpeedDouble), 30, 30);
             //PtnSortingSelectionDropDown.Canvas.Rectangle(10, 5, Round(I*1.11)*2, I*2);
             sleep(1);
           end;
@@ -380,11 +780,15 @@ begin
             end;
 
 
-
+            for i := 0 to length(DropDownItems)-1 do
+            begin
+              TextOut(DropDownItems[I].Text.x, DropDownItems[I].Text.y, DropDownItems[I].Text.Text);
+            end;
+            {
             TextOut(30, 30,  'QuickSort');
             TextOut(30, 70,  'BubbleSort');
             TextOut(30, 110,  'BoggoSort');
-
+            }
           end;
 
           Working:= false;
@@ -715,7 +1119,7 @@ begin
 
 
     //Hover Animations
-
+    {
     //BubbleSort
     if CursorIsInArea(BubbleSortButton) then
     //If cursor is in the specific Area
@@ -750,7 +1154,7 @@ begin
       //PtnSortingSelectionDropDown.Canvas.Font.Color:= clBlack;
       PtnSortingSelectionDropDown.Canvas.TextOut(30, 30,  'QuickSort');
     end;
-
+     }
     //BubbleSort
 
   end;

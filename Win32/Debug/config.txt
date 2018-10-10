@@ -1,0 +1,7 @@
+config of SortingMachine
+by Elias Peeters
+
+{
+  dark-theme: false
+  animation-speed: 3
+}
