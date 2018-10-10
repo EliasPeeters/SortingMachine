@@ -9,12 +9,22 @@ uses
 
 type
 
+  TText = Record
+    Text: String;
+    x: Integer;
+    y: Integer;
+  End;
+
   TClickAbleArea = Record
     x1: Integer;
     x2: Integer;
     y1: Integer;
     y2: Integer;
+    Text: TText;
+    Position: Integer;
   End;
+
+
 
 
   TMainForm = class(TForm)
@@ -46,6 +56,9 @@ type
 
     procedure DefineRects();
     procedure DefineColors();
+    procedure CreateArea(PositionInt: Integer; TextString: string);
+
+    function CursorIsInArea(Area: TClickAbleArea):Boolean;
 
   private
     { Private-Deklarationen }
@@ -66,7 +79,8 @@ var
   SelectedChartType: Integer = 1;
   SelectedSorting: Integer = 0;
   CursorPosition: TPoint;
-  BubbleSortButton: TClickAbleArea;
+  BubbleSortButton, QuickSortButton, BoggoSortButton: TClickAbleArea;
+  DropDownItems: Array[0..2] of TClickAbleArea;
 
   {
     1 = PieChart
@@ -85,12 +99,65 @@ implementation
 
 {$R *.dfm}
 
+function CalculateDropDownHeight(NumberOfItems: Integer): Integer;
+begin
+  result:= 30+30+NumberOfItems*40;
+end;
+
+function TMainForm.CursorIsInArea(Area: TClickAbleArea):Boolean;
+var
+  XAchsTrue, YAchsTrue: Boolean;
+begin
+  XAchsTrue:= False;
+  YAchsTrue:= False;
+
+  if (CursorPosition.x >= Area.x1) and (CursorPosition.x <= Area.x2) then
+  begin
+    XAchsTrue:= True;
+  end;
+
+   if (CursorPosition.y >= Area.y1) and (CursorPosition.y <= Area.y2) then
+  begin
+    YAchsTrue:= True;
+  end;
+
+  if (YAchsTrue) and (XAchsTrue) then
+  begin
+    result:= true;
+  end
+  else
+  begin
+    result:= false;
+  end;
+end;
+
+
+procedure TMainForm.CreateArea(PositionInt: Integer; TextString: string);
+begin
+  with DropDownItems[PositionInt] do
+  begin
+    Text.Text:= TextString;
+    Text.x:= 30;
+    Text.y:= 30+(PositionInt*40);
+    x1:= 948;
+    x2:= 1248;
+    y1:= 330+(PositionInt*40);
+    y2:= 370+(PositionInt*40);
+    Position:= PositionInt;
+  end;
+end;
+
 procedure TMainForm.DefineRects;
 begin
   BubbleSortButton.x1:= 948;
   BubbleSortButton.x2:= 1248;
   BubbleSortButton.y1:= 370;
   BubbleSortButton.y2:= 410;
+
+  QuickSortButton.x1:= 948;
+  QuickSortButton.x2:= 1248;
+  QuickSortButton.y1:= 330;
+  QuickSortButton.y2:= 369;
 end;
 
 procedure TMainForm.DefineColors;
@@ -162,7 +229,9 @@ end;
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
   DefineColors();
-  DefineRects();
+  //DefineRects();
+  CreateArea(0, 'QuickSort');
+  CreateArea(1, 'BubbleSort');
   BackgroundColor:= GreyCustom;
   color:= BackgroundColor;
 
@@ -175,7 +244,7 @@ begin
   begin
 
 
-    if DropDownOpended and ((CursorPosition.X >= 948 ) and (CursorPosition.X <= 1248 )) and ((CursorPosition.Y >= 370) and (CursorPosition.Y <= 410))   then
+    if DropDownOpended and CursorIsInArea(BubbleSortButton) then
     begin
       Label1.Font.Color:= clGreen;
       DrawSelector('BubbleSort', true);
@@ -309,6 +378,8 @@ begin
               Size:= 15;
               Color:=  clBlack;;
             end;
+
+
 
             TextOut(30, 30,  'QuickSort');
             TextOut(30, 70,  'BubbleSort');
@@ -641,12 +712,19 @@ begin
 
   if DropDownOpended then
   begin
-    if ((CursorPosition.X >= 948 ) and (CursorPosition.X <= 1248 )) and ((CursorPosition.Y >= 370) and (CursorPosition.Y <= 410))   then
+
+
+    //Hover Animations
+
+    //BubbleSort
+    if CursorIsInArea(BubbleSortButton) then
+    //If cursor is in the specific Area
     begin
-        PtnSortingSelectionDropDown.Canvas.Brush.Color:= BlueSelected;
-        PtnSortingSelectionDropDown.Canvas.Pen.Color:= BlueSelected;
-        PtnSortingSelectionDropDown.Canvas.Rectangle(13, 60, 282, 100);
-        PtnSortingSelectionDropDown.Canvas.TextOut(30, 70,  'BubbleSort');
+      //Draw it Blue and wirte the Text again
+      PtnSortingSelectionDropDown.Canvas.Brush.Color:= BlueSelected;
+      PtnSortingSelectionDropDown.Canvas.Pen.Color:= BlueSelected;
+      PtnSortingSelectionDropDown.Canvas.Rectangle(13, 60, 282, 100);
+      PtnSortingSelectionDropDown.Canvas.TextOut(30, 70,  'BubbleSort');
     end
     else
     begin
@@ -655,6 +733,26 @@ begin
       PtnSortingSelectionDropDown.Canvas.Rectangle(13, 60, 282, 100);
       PtnSortingSelectionDropDown.Canvas.TextOut(30, 70,  'BubbleSort');
     end;
+
+    //QuickSort
+    if CursorIsInArea(QuickSortButton) then
+    begin
+      PtnSortingSelectionDropDown.Canvas.Brush.Color:= BlueSelected;
+      PtnSortingSelectionDropDown.Canvas.Pen.Color:= BlueSelected;
+      PtnSortingSelectionDropDown.Canvas.Rectangle(13, 20, 282, 60);
+      PtnSortingSelectionDropDown.Canvas.TextOut(30, 30,  'QuickSort');
+    end
+    else
+    begin
+      PtnSortingSelectionDropDown.Canvas.Brush.Color:= clWhite;
+      PtnSortingSelectionDropDown.Canvas.Pen.Color:= clWhite;
+      PtnSortingSelectionDropDown.Canvas.Rectangle(13, 20, 282, 60);
+      //PtnSortingSelectionDropDown.Canvas.Font.Color:= clBlack;
+      PtnSortingSelectionDropDown.Canvas.TextOut(30, 30,  'QuickSort');
+    end;
+
+    //BubbleSort
+
   end;
 end;
 
