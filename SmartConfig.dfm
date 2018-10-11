@@ -22,7 +22,6 @@ object SmartConfigForm: TSmartConfigForm
     Top = 0
     Width = 350
     Height = 250
-    OnClick = SmartConfigPtnClick
   end
   object Timer1: TTimer
     Enabled = False

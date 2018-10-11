@@ -3,6 +3,5 @@ by Elias Peeters
 
 {
   dark-theme: false
-  animaition-speed: 3
   animation-speed: 1,5
 }

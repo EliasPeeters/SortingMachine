@@ -74,6 +74,7 @@ type
     procedure TextFileToArray();
     procedure ArrayToTextFile();
     procedure LoadSampleConfig();
+    procedure AddErrorToConfig;
 
   private
     { Private-Deklarationen }
@@ -99,7 +100,9 @@ var
   DropDownItems: Array[0..2] of TClickAbleArea;
   TextFileStorage: Array[0..100] of String;
   SampleConfig: Array[0..10] of String;
-
+  ErrorBoolean: Boolean = false;
+  ErrorFirst: Boolean = false;
+  ErrorAccured: Boolean = false;
 
   {
     1 = PieChart
@@ -144,6 +147,9 @@ implementation
 
 
 procedure TMainForm.Error(ErrorInteger: Integer);
+var
+  Stor: Double;
+  Error: Boolean;
 begin
   case ErrorInteger of
     1:
@@ -255,8 +261,18 @@ begin
 
             if ModalResult = mrYes then
             begin
+              ErrorFirst:= true;
               AddStringToConfig('  animation-speed: 1,5');
+              try
+                stor:= AnimationSpeed;
+              except
+                ErrorAccured:= true;
+                AddErrorToConfig;
+              end;
+
               SmartConfigForm.Show;
+              ErrorFirst:= false;
+              ErrorAccured:= false;
               abort;
             end;
 
@@ -302,6 +318,7 @@ begin
 end;
 
 
+
 procedure TMainForm.LoadSampleConfig;
 var
   I: Integer;
@@ -324,6 +341,28 @@ begin
     Writeln(ConfigTXT, TextFileStorage[i]);
   end;
   CloseFile(ConfigTXT);
+end;
+
+procedure ClearArray();
+var
+I: Integer;
+begin
+  if TextFileStorage[0] = '' then TextFileStorage[0]:= '0';
+
+  for I := 1 to StrToInt(TextFileStorage[0]) do
+  begin
+    TextFileStorage[i]:= '';
+  end;
+
+end;
+
+procedure TMainForm.AddErrorToConfig;
+begin
+  ClearArray;
+  TextFileToArray;
+  TextFileStorage[0]:= IntToStr(StrToInt(TextFileStorage[0])-1);
+  ErrorBoolean:= true;
+  ArrayToTextFile;
 end;
 
 procedure TMainForm.TextFileToArray();
@@ -377,11 +416,17 @@ begin
     AssignFile(ConfigTXT, config);
     Rewrite(ConfigTXT);
 
+
     for I := 1 to StrToInt(TextFileStorage[0]) do
     begin
       Writeln(ConfigTXT, TextFileStorage[i]);
     end;
     Writeln(ConfigTXT, '}');
+
+    if ErrorAccured then
+    begin
+      Writeln(ConfigTXT, '1');
+    end;
     CloseFile(ConfigTXT);
 
 
@@ -449,7 +494,7 @@ var
   FoundInLine, i, ConfigTXTLength: Integer;
   ConfigTXT: TextFile;
 begin
-
+  ClearArray;
   TextFileToArray;
   for I := 1 to StrToInt(TextFileStorage[0])  do
   begin
@@ -465,7 +510,9 @@ begin
 
   if i-1 = StrToInt(TextFileStorage[0]) then
   begin
-    error(306);
+    ErrorBoolean:= true;
+
+    if not(ErrorFirst) then error(306);
     Abort;
   end;
 
