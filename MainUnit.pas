@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, OpenImage, Vcl.StdCtrls,
-  Vcl.AppEvnts, DrawDiagram, StrUtils;
+  Vcl.AppEvnts, DrawDiagram, StrUtils, SmartConfig;
 
 type
 
@@ -256,6 +256,7 @@ begin
             if ModalResult = mrYes then
             begin
               AddStringToConfig('  animation-speed: 1,5');
+              SmartConfigForm.Show;
               abort;
             end;
 
@@ -647,7 +648,8 @@ end;
 procedure TMainForm.Button1Click(Sender: TObject);
 begin
   //ShowMessage(MakeStringBetter(ReadCustomln('config.txt', 5)));
-  ShowMessage(FloatToStr(AnimationSpeed));
+  //ShowMessage(FloatToStr(AnimationSpeed));
+  SmartConfigForm.Show;
 end;
 
 procedure TMainForm.buttonClick(Sender: TObject);

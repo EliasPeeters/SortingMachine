@@ -108,6 +108,10 @@
         </DCCReference>
         <DCCReference Include="OpenImage.pas"/>
         <DCCReference Include="DrawDiagram.pas"/>
+        <DCCReference Include="SmartConfig.pas">
+            <Form>SmartConfigForm</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
         <None Include="config.txt"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
@@ -131,7 +135,7 @@
                 </Source>
             </Delphi.Personality>
             <Deployment Version="3">
-                <DeployFile LocalName="Neu1.txt" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="config.txt" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
